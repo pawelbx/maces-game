@@ -1,6 +1,6 @@
 ;;; -*- lexical-binding: t -*-
 
-(defvar anagram-state nil "Holds all state of the game")
+(defvar anagram-state nil "Holds all game state")
 
 (defface anagram-letters-face
   '((t :foreground "#859900"
@@ -35,17 +35,17 @@
   (interactive)
   (switch-to-buffer "anagram")
   (anagram-mode)
-  (init-anagram))
+  (anagram-init-game))
 
 (define-derived-mode anagram-mode special-mode "anagram"
-  (define-key anagram-mode-map (kbd "SPC") 'shuffle-anagram-letters)
-  (define-key anagram-mode-map (kbd "RET") 'check-anagram-guess)
-  (define-key anagram-mode-map (kbd "DEL") 'delete-anagram-letter)
+  (define-key anagram-mode-map (kbd "SPC") 'anagram-shuffle-letters)
+  (define-key anagram-mode-map (kbd "RET") 'anagram-check-guess)
+  (define-key anagram-mode-map (kbd "DEL") 'anagram-delete-letter)
   (--map (anagram-define-letter-key it) '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
                                           "k" "l" "m" "n" "o" "p""q" "r" "s" "t"
                                           "u" "v" "w" "x" "y" "z")))
 
-(defun check-anagram-guess()
+(defun anagram-check-guess()
   "checks if guess if correct"
   (interactive)
   (let* ((guess (anagram-get-user-input))
@@ -60,8 +60,8 @@
         (if (< (length guess) 4)
             (anagram-set-msg "At least 4 letter needed")
           (anagram-set-msg "Not Found"))))
-    (clear-user-input)
-    (render-anagram-state)))
+    (anagram-clear-user-input)
+    (anagram-render)))
 
 
 (defun anagram-add-to-found (word)
@@ -76,7 +76,7 @@
   "gets the current input"
   (nth 2 anagram-state))
 
-(defun clear-user-input ()
+(defun anagram-clear-user-input ()
   "clears user input"
   (setcar (nthcdr 2 anagram-state) ""))
 
@@ -88,12 +88,12 @@
   "gets current message to user"
   (nth 4 anagram-state))
 
-(defun delete-anagram-letter ()
+(defun anagram-delete-letter ()
   "delete letter from guess"
   (interactive)
   (setcar (nthcdr 2 anagram-state)
           (substring (nth 2 anagram-state) 0 (1- (length (nth 2 anagram-state)))))
-  (render-anagram-state))
+  (anagram-render))
 
 (defun anagram-get-points ()
   "get current points"
@@ -107,8 +107,8 @@
     (cond ((equal wlen 4) (setcar points (+ num-points 2)))
           ((< wlen 6) (setcar points (+ num-points 4)))
           ((< wlen 8) (setcar points  (+ num-points 6)))
-          ((< wlen 10) (setcar points (+ num-points 10)))
-          (t (setcar points (+ num-points 12))))))
+          ((< wlen 10) (setcar points (+ num-points 8)))
+          (t (setcar points (+ num-points 10))))))
 
 (defun anagram-define-letter-key (letter)
   (define-key anagram-mode-map (kbd letter)
@@ -116,16 +116,16 @@
       "chekc if key is valid"
       (interactive)
       (print (car anagram-state))
-      (when (str-contains? (car (coerce letter 'list)) (car anagram-state))
+      (when (anagram-str-contains? (car (coerce letter 'list)) (car anagram-state))
         (setcar (nthcdr 2 anagram-state)
                 (concat (nth 2 anagram-state) letter))
-        (render-anagram-state)))))
+        (anagram-render)))))
 
-(defun init-anagram ()
-  (setq anagram-state (generate-anagram))
-  (render-anagram-state))
+(defun anagram-init-game ()
+  (setq anagram-state (anagram-generate))
+  (anagram-render))
 
-(defun render-anagram-state ()
+(defun anagram-render ()
   (let ((inhibit-read-only t))
     (erase-buffer)
     (insert (propertize (car anagram-state) 'face 'anagram-letters-face))
@@ -135,48 +135,44 @@
     (insert "\n\n")
     (insert (propertize (nth 2 anagram-state) 'face 'anagram-guess-face))))
 
-(defun shuffle-anagram-letters ()
+(defun anagram-shuffle-letters ()
   "shuffle letters"
   (interactive)
   (setcar anagram-state (coerce (shuffle (coerce (car anagram-state) 'list)) 'string))
-  (render-anagram-state))
+  (anagram-render))
 
-(defun generate-anagram()
+(defun anagram-generate()
   (require 'dash)
-  (let* ((words (with-current-buffer
-                    (find-file-noselect "words-alpha.txt")
-                 (split-string
-                  (save-restriction
-                    (widen)
-                    (buffer-substring-no-properties
-                     (point-min)
-                     (point-max)))
-                  "\n" t)))
+  (let* ((words (anagram-load-words))
          (word (generate-anagram-letters words))
          (anagrams
           (-filter (lambda (curr-word)
                      (-reduce-from (lambda (mem letter)
-                                     (and mem (str-contains? letter word)))
+                                     (and mem (anagram-str-contains? letter word)))
                                    t (coerce curr-word 'list)))
                    words)))
-    (list (coerce (shuffle (delete-dups (coerce word 'list))) 'string)
-          anagrams
-          ""
-          0
-          ""
-          '())))
+    ;; scrambled word, anagrams, user input, points, current msg, found words
+    (list (coerce (anagram-shuffle (delete-dups (coerce word 'list))) 'string)
+          anagrams "" 0 "" '())))
 
-(defun generate-anagram-letters (words)
+(defun anagram-load-words ()
+  (with-current-buffer (find-file-noselect "words-alpha.txt")
+    (split-string
+     (save-restriction
+       (widen)
+       (buffer-substring-no-properties
+        (point-min)
+        (point-max)))
+     "\n" t)))
+
+(defun anagram-generate-letters (words)
   (let ((valid-words (--filter (> (length (delete-dups (coerce it 'list))) 6) words)))
     (nth (random (length valid-words)) valid-words)))
 
-(defun sort-string(str)
-  (coerce (sort (coerce str 'list) '<) 'string))
-
-(defun str-contains? (needle s)
+(defun anagram-str-contains? (needle s)
   (if (member needle (coerce s 'list)) t nil))
 
-(defun shuffle (list)
+(defun anagram-shuffle (list)
   (let ((shuff-list (-copy list))
         (i (- (length list) 1)))
     (while (> i 0)

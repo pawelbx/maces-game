@@ -30,6 +30,13 @@
   "face for messages"
   :group 'anagram)
 
+(defface anagram-instruction-face
+  '((t :foreground "#657b83"
+       :weight bold
+       :height 1.1))
+  "face for messages"
+  :group 'anagram)
+
 (defun anagram ()
   "Nice anagram game"
   (interactive)
@@ -41,6 +48,7 @@
   (define-key anagram-mode-map (kbd "SPC") 'anagram-shuffle-letters)
   (define-key anagram-mode-map (kbd "RET") 'anagram-check-guess)
   (define-key anagram-mode-map (kbd "DEL") 'anagram-delete-letter)
+  (define-key anagram-mode-map (kbd "Q") 'anagram-quit)
   (--map (anagram-define-letter-key it) '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
                                           "k" "l" "m" "n" "o" "p""q" "r" "s" "t"
                                           "u" "v" "w" "x" "y" "z")))
@@ -62,6 +70,11 @@
           (anagram-set-msg "Not Found"))))
     (anagram-clear-user-input)
     (anagram-render)))
+
+(defun anagram-quit ()
+  "kill current buffer"
+  (interactive)
+  (kill-buffer (current-buffer)))
 
 
 (defun anagram-add-to-found (word)
@@ -129,9 +142,14 @@
   (let ((inhibit-read-only t))
     (erase-buffer)
     (insert (propertize (car anagram-state) 'face 'anagram-letters-face))
-    (insert (propertize (format "\t\t POINTS: %d" (anagram-get-points)) 'face 'anagram-points-face))
+    (insert (propertize (format "\t\t POINTS: %d" (anagram-get-points))
+                        'face 'anagram-points-face))
     (insert "\n\n")
     (insert (propertize (anagram-get-msg) 'face 'anagram-message-face))
+    (insert "\n\n")
+    (insert (propertize (concat "Space to rotate scrambled letter\n"
+                                "Q to quit\n"
+                                "Enter to submit your guess")))
     (insert "\n\n")
     (insert (propertize (nth 2 anagram-state) 'face 'anagram-guess-face))))
 

@@ -49,7 +49,7 @@
   "checks if guess if correct"
   (interactive)
   (let* ((guess (anagram-get-user-input))
-        (words (--map (cadr it) (nth 1 anagram-state))))
+        (words (nth 1 anagram-state)))
     (if (member guess (anagram-get-found))
         (anagram-set-msg "Already found that word")
       (if (--first (equal guess it) words)
@@ -144,7 +144,7 @@
 (defun generate-anagram()
   (require 'dash)
   (let* ((words (with-current-buffer
-                    (find-file-noselect "/home/pawel/projects/scrap/anagram-generator/words_alpha.txt")
+                    (find-file-noselect "words-alpha.txt")
                  (split-string
                   (save-restriction
                     (widen)
@@ -152,15 +152,13 @@
                      (point-min)
                      (point-max)))
                   "\n" t)))
-         (norm-words (-remove (lambda (word) (< (length word) 4)) words))
-         (word (generate-anagram-letters norm-words))
-         (words-map (-map (lambda (word) (list (sort-string word) word)) norm-words))
+         (word (generate-anagram-letters words))
          (anagrams
-          (-filter (lambda (word-map)
+          (-filter (lambda (curr-word)
                      (-reduce-from (lambda (mem letter)
                                      (and mem (str-contains? letter word)))
-                                   t (coerce (car word-map) 'list)))
-                   words-map)))
+                                   t (coerce curr-word 'list)))
+                   words)))
     (list (coerce (shuffle (delete-dups (coerce word 'list))) 'string)
           anagrams
           ""

@@ -45,7 +45,7 @@
   (anagram-init-game))
 
 (define-derived-mode anagram-mode special-mode "anagram"
-  (define-key anagram-mode-map (kbd "SPC") 'anagram-shuffle-letters)
+  (define-key anagram-mode-map (kbd "SPC") 'anagram-rotate-letters)
   (define-key anagram-mode-map (kbd "RET") 'anagram-check-guess)
   (define-key anagram-mode-map (kbd "DEL") 'anagram-delete-letter)
   (define-key anagram-mode-map (kbd "Q") 'anagram-quit)
@@ -126,7 +126,7 @@
 (defun anagram-define-letter-key (letter)
   (define-key anagram-mode-map (kbd letter)
     (lambda ()
-      "chekc if key is valid"
+      "check if key is valid"
       (interactive)
       (print (car anagram-state))
       (when (anagram-str-contains? (car (coerce letter 'list)) (car anagram-state))
@@ -153,10 +153,10 @@
     (insert "\n\n")
     (insert (propertize (nth 2 anagram-state) 'face 'anagram-guess-face))))
 
-(defun anagram-shuffle-letters ()
+(defun anagram-rotate-letters ()
   "shuffle letters"
   (interactive)
-  (setcar anagram-state (coerce (shuffle (coerce (car anagram-state) 'list)) 'string))
+  (setcar anagram-state (coerce (-rotate 1 (coerce (car anagram-state) 'list)) 'string))
   (anagram-render))
 
 (defun anagram-generate()
@@ -184,7 +184,7 @@
      "\n" t)))
 
 (defun anagram-generate-letters (words)
-  (let ((valid-words (--filter (> (length (delete-dups (coerce it 'list))) 6) words)))
+  (let ((valid-words (--filter (equal (length (delete-dups (coerce it 'list))) 7) words)))
     (nth (random (length valid-words)) valid-words)))
 
 (defun anagram-str-contains? (needle s)
@@ -201,4 +201,6 @@
         (setq i (- i 1))))
     shuff-list))
 
-(provide 'anagram_gen)
+(provide 'anagram-game)
+
+;;; anagram-game.el ends here

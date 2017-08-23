@@ -146,8 +146,9 @@
     (insert "\n\n")
     (insert (propertize (anagram-get-msg) 'face 'anagram-message-face))
     (insert "\n\n")
-    (insert (propertize (concat "Make words from the letters above.\n"
+    (insert (propertize (concat "Find words from the letters above.\n"
                                 "You can use the same letter multiple times in your word.\n"
+                                "The longer the word you find, the more points you get.\n"
                                 "Try to get to at least 21 points!")))
     (insert "\n\n")
     (insert (propertize (concat "Space to rotate letters\n"

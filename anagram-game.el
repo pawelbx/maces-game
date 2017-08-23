@@ -128,7 +128,6 @@
     (lambda ()
       "check if key is valid"
       (interactive)
-      (print (car anagram-state))
       (when (anagram-str-contains? (car (coerce letter 'list)) (car anagram-state))
         (setcar (nthcdr 2 anagram-state)
                 (concat (nth 2 anagram-state) letter))
@@ -147,7 +146,11 @@
     (insert "\n\n")
     (insert (propertize (anagram-get-msg) 'face 'anagram-message-face))
     (insert "\n\n")
-    (insert (propertize (concat "Space to rotate scrambled letter\n"
+    (insert (propertize (concat "Make words from the letters above.\n"
+                                "You can use the same letter multiple times in your word.\n"
+                                "Try to get to at least 21 points!")))
+    (insert "\n\n")
+    (insert (propertize (concat "Space to rotate letters\n"
                                 "Q to quit\n"
                                 "Enter to submit your guess")))
     (insert "\n\n")

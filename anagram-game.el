@@ -122,7 +122,7 @@
     (cond ((equal wlen 4) (setcar points (+ num-points 2)))
           ((< wlen 6) (setcar points (+ num-points 4)))
           ((< wlen 10) (setcar points (+ num-points 6)))
-          (t (setcar points (+ num-points 10))))))
+          (t (setcar points (+ num-points 8))))))
 
 (defun anagram-define-letter-key (letter)
   (define-key anagram-mode-map (kbd letter)

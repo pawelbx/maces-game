@@ -1,5 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 
+(require 'cl)
+
 (defvar anagram-state nil "Holds all game state")
 
 (defface anagram-letters-face
@@ -119,8 +121,7 @@
         (num-points (anagram-get-points)))
     (cond ((equal wlen 4) (setcar points (+ num-points 2)))
           ((< wlen 6) (setcar points (+ num-points 4)))
-          ((< wlen 8) (setcar points  (+ num-points 6)))
-          ((< wlen 10) (setcar points (+ num-points 8)))
+          ((< wlen 10) (setcar points (+ num-points 6)))
           (t (setcar points (+ num-points 10))))))
 
 (defun anagram-define-letter-key (letter)
@@ -134,6 +135,10 @@
         (anagram-render)))))
 
 (defun anagram-init-game ()
+  (let ((inhibit-read-only t))
+    (erase-buffer)
+    (insert (propertize "Loading Anagrams..." 'face 'anagram-guess-face))
+    (redisplay t))
   (setq anagram-state (anagram-generate))
   (anagram-render))
 
@@ -166,7 +171,7 @@
 (defun anagram-generate()
   (require 'dash)
   (let* ((words (anagram-load-words))
-         (word (generate-anagram-letters words))
+         (word (anagram-generate-letters words))
          (anagrams
           (-filter (lambda (curr-word)
                      (-reduce-from (lambda (mem letter)

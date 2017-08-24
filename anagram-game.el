@@ -1,155 +1,179 @@
-;;; -*- lexical-binding: t -*-
+;;; maces-game.el -- another anagram game for Emacs -*- lexical-binding: t -*-
+
+;; Copyright (C) 2017 Pawel Bokota
+;;
+;; Author: Pawel Bokota <pawelb.lnx@gmail.com>
+;; URL: https://github.com/pawelbx/anagram-game
+;; Version: 0.1
+;; Keywords: games, word games, anagram
+;; Package-Requires: ((dash "2.13.0"))
+
+;;; License:
+
+;; Licensed under the same terms as Emacs.
+
+;;; Commentary:
+
+;; The interface should be pretty intuitive: it displays a sequence of
+
+;; To play game run the function `maces-game'
+;; This game was inspired by the New York Times puzzle game
+;; "Spelling Bee." The idea is to create words out of the given
+;; seven letters.  You can use each given letter multiple times.  The
+;; longer the word you create, the more points you earn.
 
 (require 'cl)
+(require 'dash)
 
-(defvar anagram-state nil "Holds all game state")
+;;; Code:
 
-(defface anagram-letters-face
+(defvar maces-game-state nil "Holds all game state.")
+
+(defface maces-game-letters-face
   '((t :foreground "#859900"
        :weight bold
        :height 1.5))
   "face for shuffled letters"
-  :group 'anagram)
+  :group 'maces-game)
 
-(defface anagram-guess-face
+(defface maces-game-guess-face
   '((t :foreground "#268bd2"
        :weight bold
        :height 1.5))
   "face for user input"
-  :group 'anagram)
+  :group 'maces-game)
 
-(defface anagram-points-face
+(defface maces-game-points-face
   '((t :foreground "#2aa198"
        :weight bold
        :height 1.5))
   "face for points"
-  :group 'anagram)
+  :group 'maces-game)
 
-(defface anagram-message-face
+(defface maces-game-message-face
   '((t :foreground "#6c71c4"
        :weight bold
        :height 1.5))
   "face for messages"
-  :group 'anagram)
+  :group 'maces-game)
 
-(defface anagram-instruction-face
+(defface maces-game-instruction-face
   '((t :foreground "#657b83"
        :weight bold
        :height 1.1))
   "face for messages"
-  :group 'anagram)
+  :group 'maces-game)
 
-(defun anagram ()
-  "Nice anagram game"
+(defun maces-game ()
+  "Create a new anagram game."
   (interactive)
-  (switch-to-buffer "anagram")
-  (anagram-mode)
-  (anagram-init-game))
+  (switch-to-buffer "maces-game")
+  (maces-game-mode)
+  (maces-game-init-game))
 
-(define-derived-mode anagram-mode special-mode "anagram"
-  (define-key anagram-mode-map (kbd "SPC") 'anagram-rotate-letters)
-  (define-key anagram-mode-map (kbd "RET") 'anagram-check-guess)
-  (define-key anagram-mode-map (kbd "DEL") 'anagram-delete-letter)
-  (define-key anagram-mode-map (kbd "Q") 'anagram-quit)
-  (--map (anagram-define-letter-key it) '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
+(define-derived-mode maces-game-mode special-mode "maces-game"
+  (define-key maces-game-mode-map (kbd "SPC") 'maces-game-rotate-letters)
+  (define-key maces-game-mode-map (kbd "RET") 'maces-game-check-guess)
+  (define-key maces-game-mode-map (kbd "DEL") 'maces-game-delete-letter)
+  (define-key maces-game-mode-map (kbd "Q") 'maces-game-quit)
+  (--map (maces-game-define-letter-key it) '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
                                           "k" "l" "m" "n" "o" "p""q" "r" "s" "t"
                                           "u" "v" "w" "x" "y" "z")))
 
-(defun anagram-check-guess()
+(defun maces-game-check-guess()
   "checks if guess if correct"
   (interactive)
-  (let* ((guess (anagram-get-user-input))
-        (words (nth 1 anagram-state)))
-    (if (member guess (anagram-get-found))
-        (anagram-set-msg "Already found that word")
+  (let* ((guess (maces-game-get-user-input))
+        (words (nth 1 maces-game-state)))
+    (if (member guess (maces-game-get-found))
+        (maces-game-set-msg "Already found that word")
       (if (--first (equal guess it) words)
           (progn
-            (anagram-add-to-found guess)
-            (anagram-set-msg "Nice!")
-            (anagram-add-points guess))
+            (maces-game-add-to-found guess)
+            (maces-game-set-msg "Nice!")
+            (maces-game-add-points guess))
         (if (< (length guess) 4)
-            (anagram-set-msg "At least 4 letter needed")
-          (anagram-set-msg "Not Found"))))
-    (anagram-clear-user-input)
-    (anagram-render)))
+            (maces-game-set-msg "At least 4 letter needed")
+          (maces-game-set-msg "Not Found"))))
+    (maces-game-clear-user-input)
+    (maces-game-render)))
 
-(defun anagram-quit ()
-  "kill current buffer"
+(defun maces-game-quit ()
+  "Kill current buffer."
   (interactive)
   (kill-buffer (current-buffer)))
 
 
-(defun anagram-add-to-found (word)
-  "gets words that have been found"
-    (setcar (nthcdr 5 anagram-state) (cons word (anagram-get-found))))
+(defun maces-game-add-to-found (word)
+  "Add word to found list."
+    (setcar (nthcdr 5 maces-game-state) (cons word (maces-game-get-found))))
 
-(defun anagram-get-found ()
-  "gets words that have been found"
-  (nth 5 anagram-state))
+(defun maces-game-get-found ()
+  "Gets words that have been found."
+  (nth 5 maces-game-state))
 
-(defun anagram-get-user-input ()
-  "gets the current input"
-  (nth 2 anagram-state))
+(defun maces-game-get-user-input ()
+  "Gets the current user input."
+  (nth 2 maces-game-state))
 
-(defun anagram-clear-user-input ()
-  "clears user input"
-  (setcar (nthcdr 2 anagram-state) ""))
+(defun maces-game-clear-user-input ()
+  "Clears user input."
+  (setcar (nthcdr 2 maces-game-state) ""))
 
-(defun anagram-set-msg (msg)
-  "sets message to user"
-  (setcar (nthcdr 4 anagram-state) msg))
+(defun maces-game-set-msg (msg)
+  "Set message for user."
+  (setcar (nthcdr 4 maces-game-state) msg))
 
-(defun anagram-get-msg ()
-  "gets current message to user"
-  (nth 4 anagram-state))
+(defun maces-game-get-msg ()
+  "Gets current message to user."
+  (nth 4 maces-game-state))
 
-(defun anagram-delete-letter ()
-  "delete letter from guess"
+(defun maces-game-delete-letter ()
+  "Delete letter from guess."
   (interactive)
-  (setcar (nthcdr 2 anagram-state)
-          (substring (nth 2 anagram-state) 0 (1- (length (nth 2 anagram-state)))))
-  (anagram-render))
+  (setcar (nthcdr 2 maces-game-state)
+          (substring (nth 2 maces-game-state) 0 (1- (length (nth 2 maces-game-state)))))
+  (maces-game-render))
 
-(defun anagram-get-points ()
-  "get current points"
-  (nth 3 anagram-state))
+(defun maces-game-get-points ()
+  "Get current points."
+  (nth 3 maces-game-state))
 
-(defun anagram-add-points (word)
-  "add points dependent of the length of the word"
-  (let ((points (nthcdr 3 anagram-state))
+(defun maces-game-add-points (word)
+  "Add points dependent of the length of the WORD."
+  (let ((points (nthcdr 3 maces-game-state))
         (wlen (length word))
-        (num-points (anagram-get-points)))
-    (cond ((equal wlen 4) (setcar points (+ num-points 2)))
-          ((< wlen 6) (setcar points (+ num-points 4)))
-          ((< wlen 10) (setcar points (+ num-points 6)))
-          (t (setcar points (+ num-points 8))))))
+        (num-points (maces-game-get-points)))
+    (cond ((<= wlen 6) (setcar points (+ num-points 2)))
+          ((<= wlen 10) (setcar points (+ num-points 4)))
+          (t (setcar points (+ num-points 6))))))
 
-(defun anagram-define-letter-key (letter)
-  (define-key anagram-mode-map (kbd letter)
+(defun maces-game-define-letter-key (letter)
+  (define-key maces-game-mode-map (kbd letter)
     (lambda ()
       "check if key is valid"
       (interactive)
-      (when (anagram-str-contains? (car (coerce letter 'list)) (car anagram-state))
-        (setcar (nthcdr 2 anagram-state)
-                (concat (nth 2 anagram-state) letter))
-        (anagram-render)))))
+      (when (maces-game-str-contains? (car (coerce letter 'list)) (car maces-game-state))
+        (setcar (nthcdr 2 maces-game-state)
+                (concat (nth 2 maces-game-state) letter))
+        (maces-game-render)))))
 
-(defun anagram-init-game ()
+(defun maces-game-init-game ()
   (let ((inhibit-read-only t))
     (erase-buffer)
-    (insert (propertize "Loading Anagrams..." 'face 'anagram-guess-face))
+    (insert (propertize "Loading Anagrams..." 'face 'maces-game-guess-face))
     (redisplay t))
-  (setq anagram-state (anagram-generate))
-  (anagram-render))
+  (setq maces-game-state (maces-game-generate))
+  (maces-game-render))
 
-(defun anagram-render ()
+(defun maces-game-render ()
   (let ((inhibit-read-only t))
     (erase-buffer)
-    (insert (propertize (car anagram-state) 'face 'anagram-letters-face))
-    (insert (propertize (format "\t\t POINTS: %d" (anagram-get-points))
-                        'face 'anagram-points-face))
+    (insert (propertize (car maces-game-state) 'face 'maces-game-letters-face))
+    (insert (propertize (format "\t\t POINTS: %d" (maces-game-get-points))
+                        'face 'maces-game-points-face))
     (insert "\n\n")
-    (insert (propertize (anagram-get-msg) 'face 'anagram-message-face))
+    (insert (propertize (maces-game-get-msg) 'face 'maces-game-message-face))
     (insert "\n\n")
     (insert (propertize (concat "Find words from the letters above.\n"
                                 "You can use the same letter multiple times in your word.\n"
@@ -160,29 +184,28 @@
                                 "Q to quit\n"
                                 "Enter to submit your guess")))
     (insert "\n\n")
-    (insert (propertize (nth 2 anagram-state) 'face 'anagram-guess-face))))
+    (insert (propertize (nth 2 maces-game-state) 'face 'maces-game-guess-face))))
 
-(defun anagram-rotate-letters ()
-  "shuffle letters"
+(defun maces-game-rotate-letters ()
+  "Shuffle letters."
   (interactive)
-  (setcar anagram-state (coerce (-rotate 1 (coerce (car anagram-state) 'list)) 'string))
-  (anagram-render))
+  (setcar maces-game-state (coerce (-rotate 1 (coerce (car maces-game-state) 'list)) 'string))
+  (maces-game-render))
 
-(defun anagram-generate()
-  (require 'dash)
-  (let* ((words (anagram-load-words))
-         (word (anagram-generate-letters words))
+(defun maces-game-generate()
+  (let* ((words (maces-game-load-words))
+         (word (maces-game-generate-letters words))
          (anagrams
           (-filter (lambda (curr-word)
                      (-reduce-from (lambda (mem letter)
-                                     (and mem (anagram-str-contains? letter word)))
+                                     (and mem (maces-game-str-contains? letter word)))
                                    t (coerce curr-word 'list)))
                    words)))
     ;; scrambled word, anagrams, user input, points, current msg, found words
-    (list (coerce (anagram-shuffle (delete-dups (coerce word 'list))) 'string)
+    (list (coerce (maces-game-shuffle (delete-dups (coerce word 'list))) 'string)
           anagrams "" 0 "" '())))
 
-(defun anagram-load-words ()
+(defun maces-game-load-words ()
   (with-current-buffer (find-file-noselect "words-alpha.txt")
     (split-string
      (save-restriction
@@ -192,14 +215,14 @@
         (point-max)))
      "\n" t)))
 
-(defun anagram-generate-letters (words)
+(defun maces-game-generate-letters (words)
   (let ((valid-words (--filter (equal (length (delete-dups (coerce it 'list))) 7) words)))
     (nth (random (length valid-words)) valid-words)))
 
-(defun anagram-str-contains? (needle s)
+(defun maces-game-str-contains? (needle s)
   (if (member needle (coerce s 'list)) t nil))
 
-(defun anagram-shuffle (list)
+(defun maces-game-shuffle (list)
   (let ((shuff-list (-copy list))
         (i (- (length list) 1)))
     (while (> i 0)
@@ -210,6 +233,6 @@
         (setq i (- i 1))))
     shuff-list))
 
-(provide 'anagram-game)
+(provide 'maces-game)
 
-;;; anagram-game.el ends here
+;;; maces-game.el ends here

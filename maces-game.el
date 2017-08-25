@@ -82,17 +82,17 @@
   "checks if guess if correct"
   (interactive)
   (let* ((guess (maces-game-get-user-input))
-        (words (nth 1 maces-game-state)))
-    (if (member guess (maces-game-get-found))
-        (maces-game-set-msg "Already found that word")
-      (if (--first (equal guess it) words)
-          (progn
-            (maces-game-add-to-found guess)
-            (maces-game-set-msg "Nice!")
-            (maces-game-add-points guess))
-        (if (< (length guess) 4)
-            (maces-game-set-msg "At least 4 letter needed")
-          (maces-game-set-msg "Not Found"))))
+         (words (nth 1 maces-game-state)))
+
+    (cond ((member guess (maces-game-get-found))
+           (maces-game-set-msg "Already found that word"))
+          ((< (length guess) 4)
+           (maces-game-set-msg "At least 4 letter needed"))
+          ((--first (equal guess it) words)
+           (maces-game-add-to-found guess)
+           (maces-game-set-msg "Nice!")
+           (maces-game-add-points guess))
+          (t (maces-game-set-msg "Not Found")))
     (maces-game-clear-user-input)
     (maces-game-render)))
 
@@ -204,7 +204,7 @@
           anagrams "" 0 "" '())))
 
 (defun maces-game-load-words ()
-  (with-current-buffer (find-file-noselect "words-alpha.txt")
+  (with-current-buffer (find-file-noselect "words.txt")
     (split-string
      (save-restriction
        (widen)

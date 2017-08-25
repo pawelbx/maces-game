@@ -1,16 +1,16 @@
-;;; maces-game.el -- another anagram game for Emacs -*- lexical-binding: t -*-
+;;; maces-game.el --- another anagram game. -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2017 Pawel Bokota
-;;
+;; Copyright (C) 2017, Pawel Bokota
+
 ;; Author: Pawel Bokota <pawelb.lnx@gmail.com>
+;; Created: 24 Aug 2017
 ;; URL: https://github.com/pawelbx/anagram-game
 ;; Version: 0.1
 ;; Keywords: games, word games, anagram
-;; Package-Requires: ((dash "2.13.0"))
+;; Package-Requires: ((dash "2.12.0") (emacs "24"))
+;; License: GPL v3
 
-;;; License:
-
-;; Licensed under the same terms as Emacs.
+;; This file is not part of GNU Emacs.
 
 ;;; Commentary:
 
@@ -20,10 +20,9 @@
 ;; seven letters.  You can use each given letter multiple times.  The
 ;; longer the word you create, the more points you earn.
 
+;;; Code:
 (require 'cl)
 (require 'dash)
-
-;;; Code:
 
 (defvar maces-game-state nil "Holds all game state.")
 

@@ -20,6 +20,10 @@
 ;; seven letters.  You can use each given letter multiple times.  The
 ;; longer the word you create, the more points you earn.
 
+;;; Installation:
+
+;; (require 'maces-game)
+
 ;;; Code:
 (require 'cl)
 (require 'dash)
@@ -205,7 +209,6 @@
           anagrams "" 0 "" '())))
 
 (defun maces-game-load-words ()
-  (message (concat maces-game-dir "words.txt"))
   (with-current-buffer
       (find-file-noselect (concat maces-game-dir "words.txt"))
     (split-string

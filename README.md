@@ -7,6 +7,11 @@ the word you create, the more points you earn.
 
 ![macEs](screenshot.png)
 
+# Installation
+```
+(require 'maces-game)
+```
+
 # Acknowledgements
 
 Words list comes from Jumblr. The other anagram game for emacs:

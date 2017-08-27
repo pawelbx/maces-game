@@ -25,6 +25,7 @@
 (require 'dash)
 
 (defvar maces-game-state nil "Holds all game state.")
+(defconst maces-game-dir (file-name-directory (or load-file-name buffer-file-name)))
 
 (defface maces-game-letters-face
   '((t :foreground "#859900"
@@ -203,7 +204,8 @@
           anagrams "" 0 "" '())))
 
 (defun maces-game-load-words ()
-  (with-current-buffer (find-file-noselect "words.txt")
+  (with-current-buffer
+      (find-file-noselect (concat maces-game-dir "words.txt"))
     (split-string
      (save-restriction
        (widen)

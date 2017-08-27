@@ -199,11 +199,13 @@
                                      (and mem (maces-game-str-contains? letter word)))
                                    t (coerce curr-word 'list)))
                    words)))
+    (format "%d" (length words))
     ;; scrambled word, anagrams, user input, points, current msg, found words
     (list (coerce (maces-game-shuffle (delete-dups (coerce word 'list))) 'string)
           anagrams "" 0 "" '())))
 
 (defun maces-game-load-words ()
+  (message (concat maces-game-dir "words.txt"))
   (with-current-buffer
       (find-file-noselect (concat maces-game-dir "words.txt"))
     (split-string

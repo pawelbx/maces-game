@@ -51,7 +51,7 @@
   :group 'maces-game)
 
 (defface maces-game-message-face
-  '((t :inherit custom-face-tag
+  '((t :inherit font-lock-warning-face
        :weight bold
        :height 1.5))
   "face for messages"

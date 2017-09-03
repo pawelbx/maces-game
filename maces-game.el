@@ -7,7 +7,7 @@
 ;; URL: https://github.com/pawelbx/anagram-game
 ;; Version: 0.1
 ;; Keywords: games, word games, anagram
-;; Package-Requires: ((dash "2.12.0") (emacs "24"))
+;; Package-Requires: ((dash "2.12.0") (cl-lib "0.5") (emacs "24"))
 ;; License: GPL v3
 
 ;; This file is not part of GNU Emacs.
@@ -25,8 +25,8 @@
 ;; (require 'maces-game)
 
 ;;; Code:
-(require 'cl)
 (require 'dash)
+(require 'cl-lib)
 
 (defvar maces-game-state nil "Holds all game state.")
 (defconst maces-game-dir (file-name-directory (or load-file-name buffer-file-name)))
@@ -77,10 +77,9 @@
   (define-key maces-game-mode-map (kbd "SPC") 'maces-game-rotate-letters)
   (define-key maces-game-mode-map (kbd "RET") 'maces-game-check-guess)
   (define-key maces-game-mode-map (kbd "DEL") 'maces-game-delete-letter)
-  (define-key maces-game-mode-map (kbd "Q") 'maces-game-quit)
-  (--map (maces-game-define-letter-key it) '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
-                                          "k" "l" "m" "n" "o" "p""q" "r" "s" "t"
-                                          "u" "v" "w" "x" "y" "z")))
+  (mapc 'maces-game-define-letter-key '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
+                                        "k" "l" "m" "n" "o" "p""q" "r" "s" "t"
+                                        "u" "v" "w" "x" "y" "z")))
 
 (defun maces-game-check-guess()
   "checks if guess if correct"
@@ -108,7 +107,7 @@
 
 (defun maces-game-add-to-found (word)
   "Add word to found list."
-    (setcar (nthcdr 5 maces-game-state) (cons word (maces-game-get-found))))
+  (setcar (nthcdr 5 maces-game-state) (cons word (maces-game-get-found))))
 
 (defun maces-game-get-found ()
   "Gets words that have been found."
@@ -155,7 +154,7 @@
     (lambda ()
       "check if key is valid"
       (interactive)
-      (when (maces-game-str-contains? (car (coerce letter 'list)) (car maces-game-state))
+      (when (maces-game-str-contains? (car (cl-coerce letter 'list)) (car maces-game-state))
         (setcar (nthcdr 2 maces-game-state)
                 (concat (nth 2 maces-game-state) letter))
         (maces-game-render)))))
@@ -191,7 +190,7 @@
 (defun maces-game-rotate-letters ()
   "Shuffle letters."
   (interactive)
-  (setcar maces-game-state (coerce (-rotate 1 (coerce (car maces-game-state) 'list)) 'string))
+  (setcar maces-game-state (cl-coerce (-rotate 1 (cl-coerce (car maces-game-state) 'list)) 'string))
   (maces-game-render))
 
 (defun maces-game-generate()
@@ -201,11 +200,10 @@
           (-filter (lambda (curr-word)
                      (-reduce-from (lambda (mem letter)
                                      (and mem (maces-game-str-contains? letter word)))
-                                   t (coerce curr-word 'list)))
+                                   t (cl-coerce curr-word 'list)))
                    words)))
-    (format "%d" (length words))
     ;; scrambled word, anagrams, user input, points, current msg, found words
-    (list (coerce (maces-game-shuffle (delete-dups (coerce word 'list))) 'string)
+    (list (cl-coerce (maces-game-shuffle (delete-dups (cl-coerce word 'list))) 'string)
           anagrams "" 0 "" '())))
 
 (defun maces-game-load-words ()
@@ -220,11 +218,11 @@
      "\n" t)))
 
 (defun maces-game-generate-letters (words)
-  (let ((valid-words (--filter (equal (length (delete-dups (coerce it 'list))) 7) words)))
+  (let ((valid-words (--filter (equal (length (delete-dups (cl-coerce it 'list))) 7) words)))
     (nth (random (length valid-words)) valid-words)))
 
 (defun maces-game-str-contains? (needle s)
-  (if (member needle (coerce s 'list)) t nil))
+  (if (member needle (cl-coerce s 'list)) t nil))
 
 (defun maces-game-shuffle (list)
   (let ((shuff-list (-copy list))

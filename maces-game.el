@@ -74,6 +74,7 @@
   (define-key maces-game-mode-map (kbd "SPC") 'maces-game-rotate-letters)
   (define-key maces-game-mode-map (kbd "RET") 'maces-game-check-guess)
   (define-key maces-game-mode-map (kbd "DEL") 'maces-game-delete-letter)
+  (define-key maces-game-mode-map (kbd "Q") 'maces-game-quit)
   (mapc 'maces-game-define-letter-key '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
                                         "k" "l" "m" "n" "o" "p" "q" "r" "s" "t"
                                         "u" "v" "w" "x" "y" "z")))

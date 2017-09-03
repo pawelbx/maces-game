@@ -32,36 +32,33 @@
 (defconst maces-game-dir (file-name-directory (or load-file-name buffer-file-name)))
 
 (defface maces-game-letters-face
-  '((t :foreground "#859900"
-       :weight bold
+  '((t :inherit font-lock-keyword-face
        :height 1.5))
   "face for shuffled letters"
   :group 'maces-game)
 
 (defface maces-game-guess-face
-  '((t :foreground "#268bd2"
-       :weight bold
+  '((t :inherit font-lock-constant-face
        :height 1.5))
   "face for user input"
   :group 'maces-game)
 
 (defface maces-game-points-face
-  '((t :foreground "#2aa198"
+  '((t :inherit font-lock-doc-face
        :weight bold
        :height 1.5))
   "face for points"
   :group 'maces-game)
 
 (defface maces-game-message-face
-  '((t :foreground "#6c71c4"
+  '((t :inherit custom-face-tag
        :weight bold
        :height 1.5))
   "face for messages"
   :group 'maces-game)
 
 (defface maces-game-instruction-face
-  '((t :foreground "#657b83"
-       :weight bold
+  '((t :inherit font-lock-builtin-face
        :height 1.1))
   "face for messages"
   :group 'maces-game)
@@ -69,7 +66,7 @@
 (defun maces-game ()
   "Create a new anagram game."
   (interactive)
-  (switch-to-buffer "maces-game")
+  (switch-to-buffer "*maces-game*")
   (maces-game-mode)
   (maces-game-init-game))
 
@@ -78,7 +75,7 @@
   (define-key maces-game-mode-map (kbd "RET") 'maces-game-check-guess)
   (define-key maces-game-mode-map (kbd "DEL") 'maces-game-delete-letter)
   (mapc 'maces-game-define-letter-key '("a" "b" "c" "d" "e" "f" "g" "h" "i" "j"
-                                        "k" "l" "m" "n" "o" "p""q" "r" "s" "t"
+                                        "k" "l" "m" "n" "o" "p" "q" "r" "s" "t"
                                         "u" "v" "w" "x" "y" "z")))
 
 (defun maces-game-check-guess()

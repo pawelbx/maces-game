@@ -12,6 +12,10 @@ the word you create, the more points you earn.
 (require 'maces-game)
 ```
 
+# New Game
+```
+M-x maces-game
+```
 # Acknowledgements
 
 Words list comes from Jumblr. The other anagram game for emacs:
